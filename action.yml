@@ -25,7 +25,7 @@ runs:
       shell: bash
       run: >
         git clone https://github.com/flipperdevices/flipperzero-ufbt ${{ runner.temp }}/flipperzero-ufbt;
-        echo "${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_PATH
+        echo "${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_PATH;
         echo "UFBT_ROOT=${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_ENV
 
 
@@ -68,7 +68,7 @@ runs:
     - name: Setup build env
       shell: bash
       run: >
-        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh
+        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh;
         python3 --version
 
     # - name: Download problem_matcher.json
