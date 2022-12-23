@@ -71,8 +71,9 @@ runs:
         export SCRIPT_PATH=${{ env.UFBT_ROOT }};
         # pushd ;
         source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh;
-        popd;
-        python3 --version
+        # popd;
+        # python3 --version
+        python3 ${{ github.action_path }}/tools/bundle.py ${{ env.YML_PATH }} app.zip
 
     # - name: Download problem_matcher.json
     #   shell: bash
@@ -92,8 +93,8 @@ runs:
     #       echo "::error::lint_only: Bad input!"; exit 1
     #     fi
 
-    # - name: Upload artifact
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: ${{ env.ARTIFACT }}
-    #     path: ${{ env.YML_PATH }}/dist/${{ env.ARTIFACT }}
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: app.zip
+        path: app.zip
