@@ -68,7 +68,9 @@ runs:
     - name: Setup build env
       shell: bash
       run: >
-        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh;
+        pushd ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain;
+        source fbtenv.sh;
+        popd;
         python3 --version
 
     # - name: Download problem_matcher.json
