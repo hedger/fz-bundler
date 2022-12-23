@@ -1,4 +1,5 @@
 .vscode/
 dist/
 .clang-format
-
+/venv
+__pycache__
