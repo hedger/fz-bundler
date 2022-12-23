@@ -68,8 +68,8 @@ runs:
     - name: Setup build env
       shell: bash
       run: >
-        pushd ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain;
-        source fbtenv.sh;
+        pushd ${{ env.UFBT_ROOT }};
+        source .ufbt/current/scripts/toolchain/fbtenv.sh;
         popd;
         python3 --version
 
