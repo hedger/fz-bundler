@@ -68,8 +68,9 @@ runs:
     - name: Setup build env
       shell: bash
       run: >
-        export SCRIPT_PATH=${{ env.UFBT_ROOT }};
-        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh;
+        export SCRIPT_PATH=${{ env.UFBT_ROOT }} ;
+        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh ;
+        python3 -m pip install ${{ github.action_path }}/tools/requirements.txt ;
         python3 ${{ github.action_path }}/tools/bundle.py ${{ env.YML_PATH }} app.zip
 
     # - name: Download problem_matcher.json
