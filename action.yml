@@ -32,10 +32,10 @@ runs:
     - name: Get ufbt
       shell: bash
       run: >
-        git clone https://github.com/flipperdevices/flipperzero-ufbt ${{ runner.temp }}/flipperzero-ufbt;
-        echo "${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_PATH;
-        echo "UFBT_ROOT=${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_ENV
-
+        git clone https://github.com/flipperdevices/flipperzero-ufbt ${{ runner.temp }}/flipperzero-ufbt ;
+        echo "${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_PATH ;
+        echo "UFBT_ROOT=${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_ENV ;
+        echo "DIST_DIR=${{ runner.temp }}/dist" >> $GITHUB_ENV
 
     - name: Get commit id
       shell: bash
@@ -63,6 +63,8 @@ runs:
     - name: Setup build env
       shell: bash
       run: >
+        rm -rf ${{ env.DIST_DIR }} || true ;
+        mkdir ${{ env.DIST_DIR }} ;
         BUNDLE_FLAGS="" ;
         if [ ${{ inputs.skip_lint }} != 'false' ]; then
           BUNDLE_FLAGS="--nolint" ;
@@ -73,7 +75,7 @@ runs:
         export SCRIPT_PATH=${{ env.UFBT_ROOT }} ;
         source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh ;
         python3 -m pip install -r ${{ github.action_path }}/tools/requirements.txt ;
-        python3 ${{ github.action_path }}/tools/bundle.py $BUNDLE_FLAGS ${{ env.YML_PATH }} app.zip
+        python3 ${{ github.action_path }}/tools/bundle.py $BUNDLE_FLAGS ${{ env.YML_PATH }} ${{ env.DIST_DIR }}/bundle.zip
 
     # - name: Download problem_matcher.json
     #   shell: bash
@@ -96,5 +98,5 @@ runs:
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
-        name: app.zip
-        path: app.zip
+        name: app
+        path: ${{ env.DIST_DIR }}/bundle.zip
