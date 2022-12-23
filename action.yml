@@ -69,10 +69,7 @@ runs:
       shell: bash
       run: >
         export SCRIPT_PATH=${{ env.UFBT_ROOT }};
-        # pushd ;
         source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh;
-        # popd;
-        # python3 --version
         python3 ${{ github.action_path }}/tools/bundle.py ${{ env.YML_PATH }} app.zip
 
     # - name: Download problem_matcher.json
