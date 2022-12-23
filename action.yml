@@ -1,0 +1,96 @@
+name: "Build Flipper Application Package"
+author: "hedger"
+description: "Github Action that bundles your FZ app"
+inputs:
+  path:
+    description: "Path to bundle YML manifest"
+    required: true
+  channel:
+    description: "SDK channel to use"
+    required: false
+    default: "dev"
+runs:
+  using: "composite"
+  steps:
+    - name: Set fap source path
+      shell: bash
+      run: >
+        if [ -z ${{ inputs.path }} ]; then
+          echo "YML_PATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        else
+          echo "YML_PATH=$GITHUB_WORKSPACE/${{ inputs.path }}" >> $GITHUB_ENV
+        fi
+
+    - name: Get ufbt
+      shell: bash
+      run: >
+        git clone https://github.com/flipperdevices/flipperzero-ufbt ${{ runner.temp }}/flipperzero-ufbt;
+        echo "${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_PATH
+        echo "UFBT_ROOT=${{ runner.temp }}/flipperzero-ufbt" >> $GITHUB_ENV
+
+
+    - name: Set channel
+      shell: bash
+      run: >
+        if [ ${{ inputs.channel }} = 'dev' ]; then
+          echo "CHANNEL=0" >> $GITHUB_ENV
+        elif [ ${{ inputs.channel }} = 'rc' ]; then
+          echo "CHANNEL=1" >> $GITHUB_ENV
+        elif [ ${{ inputs.channel }} = 'release' ]; then
+          echo "CHANNEL=2" >> $GITHUB_ENV
+        else
+          echo "::error::channel: Bad input!"; exit 1
+        fi
+
+    - name: Get commit id
+      shell: bash
+      run: >
+        # curl -o directory.json https://update.flipperzero.one/firmware/directory.json;
+        # echo "COMMIT_ID=$(jq -r '.channels[0].versions[0].version' directory.json)" >> $GITHUB_ENV
+        echo "COMMIT_ID=Latest" >> $GITHUB_ENV
+
+    - name: Cache toolchain
+      id: cache-fbt
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-ufbt
+      with:
+        path: ${{ runner.temp }}/flipperzero-ufbt/.ufbt/
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ inputs.channel }}-${{ env.COMMIT_ID }}
+        restore-keys: |
+          ${{ runner.os }}-${{ env.cache-name }}-${{ inputs.channel }}-${{ env.COMMIT_ID }}
+
+    - if: ${{ steps.cache-fbt.outputs.cache-hit != 'true' }}
+      name: Update ufbt if cache not found
+      shell: bash
+      run: ufbt update --channel=${{ inputs.channel }}
+
+    - name: Setup build env
+      shell: bash
+      run: >
+        source ${{ env.UFBT_ROOT }}/.ufbt/current/scripts/toolchain/fbtenv.sh
+        python3 --version
+
+    # - name: Download problem_matcher.json
+    #   shell: bash
+    #   run: curl -o problem_matcher.json https://raw.githubusercontent.com/oleksiikutuzov/flipperzero-ufbt-action/main/problem_matcher.json
+
+    # - name: Execute ufbt
+    #   shell: bash
+    #   run: >
+    #     if [ ${{ inputs.lint_only }} = 'false' ]; then
+    #       echo "::add-matcher::$GITHUB_WORKSPACE/problem_matcher.json";
+    #       cd ${{ env.YML_PATH }}; ufbt;
+    #       echo "ARTIFACT=$(basename ${{ env.YML_PATH }}/dist/*.fap)" >> $GITHUB_ENV;
+    #     elif [ ${{ inputs.lint_only }} = 'true' ]; then
+    #       echo "::add-matcher::$GITHUB_WORKSPACE/problem_matcher.json";
+    #       cd ${{ env.YML_PATH }}; ufbt lint
+    #     else
+    #       echo "::error::lint_only: Bad input!"; exit 1
+    #     fi
+
+    # - name: Upload artifact
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: ${{ env.ARTIFACT }}
+    #     path: ${{ env.YML_PATH }}/dist/${{ env.ARTIFACT }}
